@@ -1,65 +1,89 @@
+#region usings
+
 using System;
+using System.Collections.Generic;
 using Foundation;
 using UIKit;
-using System.Collections.Generic;
+
+#endregion
 
 namespace MyTunes
 {
+    public class ViewControllerSource<T> : UITableViewSource
+    {
+        #region Fields
 
-	public class ViewControllerSource<T> 
-		: UITableViewSource
-	{
-		public readonly string CellStyleName = "ViewControllerSource~"+typeof(T).Name;
+        IList<T> dataSource;
 
-		IList<T> dataSource;
-		UITableView tableView;
+        readonly UITableView tableView;
 
-		public IList<T> DataSource {
-			get {
-				return dataSource;
-			}
-			set {
-				dataSource = value;
-				tableView.ReloadData();
-			}
-		}
-		public Func<T,string> TextProc { get; set; }
-		public Func<T,string> DetailTextProc { get; set; }
+        #endregion
 
-		public ViewControllerSource(UITableView tableView)
-		{
-			this.tableView = tableView;
-		}
+        #region Constructors
 
-		public override nint NumberOfSections(UITableView tableView)
-		{
-			return 1;
-		}
+        public ViewControllerSource(UITableView tableView)
+        {
+            this.tableView = tableView;
+        }
 
-		public override nint RowsInSection(UITableView tableview, nint section)
-		{
-			return DataSource.Count;
-		}
+        #endregion
 
-		public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
-		{
-			var cell = tableView.DequeueReusableCell(CellStyleName);
-			if (cell == null) {
-				cell = new UITableViewCell(
-					(DetailTextProc == null) 
-						? UITableViewCellStyle.Default 
-						: UITableViewCellStyle.Subtitle, 
-					CellStyleName);
-			}
+        #region Properties
 
-			T item = DataSource[indexPath.Row];
+        public IList<T> DataSource
+        {
+            get
+            {
+                return this.dataSource;
+            }
+            set
+            {
+                this.dataSource = value;
+                this.tableView.ReloadData();
+            }
+        }
 
-			cell.TextLabel.Text = TextProc == null ? item.ToString() : TextProc(item);
-			if (DetailTextProc != null) {
-				cell.DetailTextLabel.Text = DetailTextProc(item);
-			}
+        public Func<T, string> TextProc { get; set; }
 
-			return cell;
-		}
-	}
+        public Func<T, string> DetailTextProc { get; set; }
+
+        #endregion
+
+        #region Public methods
+
+        public override nint NumberOfSections(UITableView tableView)
+        {
+            return 1;
+        }
+
+        public override nint RowsInSection(UITableView tableview, nint section)
+        {
+            return this.DataSource.Count;
+        }
+
+        public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
+        {
+            var cell = tableView.DequeueReusableCell(this.CellStyleName);
+            if (cell == null)
+            {
+                cell = new UITableViewCell(
+                    (this.DetailTextProc == null) ? UITableViewCellStyle.Default : UITableViewCellStyle.Subtitle,
+                    this.CellStyleName);
+            }
+
+            T item = this.DataSource[indexPath.Row];
+
+            cell.TextLabel.Text = this.TextProc == null ? item.ToString() : this.TextProc(item);
+            if (this.DetailTextProc != null)
+            {
+                cell.DetailTextLabel.Text = this.DetailTextProc(item);
+            }
+
+            return cell;
+        }
+
+        #endregion
+
+        public readonly string CellStyleName = "ViewControllerSource~" + typeof(T).Name;
+    }
 }

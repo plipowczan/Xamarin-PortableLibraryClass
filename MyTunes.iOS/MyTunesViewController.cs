@@ -1,32 +1,41 @@
-using UIKit;
+#region usings
+
 using System.Linq;
+using UIKit;
+
+#endregion
 
 namespace MyTunes
 {
-	public class MyTunesViewController : UITableViewController
-	{
-		public override void ViewDidLayoutSubviews()
-		{
-			base.ViewDidLayoutSubviews();
+    public class MyTunesViewController : UITableViewController
+    {
+        #region Public methods
 
-			TableView.ContentInset = new UIEdgeInsets (20, 0, 0, 0);
-		}
+        public override void ViewDidLayoutSubviews()
+        {
+            base.ViewDidLayoutSubviews();
 
-		public async override void ViewDidLoad()
-		{
-			base.ViewDidLoad();
+            this.TableView.ContentInset = new UIEdgeInsets(20, 0, 0, 0);
+        }
 
-			// Load the data
+        public async override void ViewDidLoad()
+        {
+            base.ViewDidLoad();
+
+            SongLoader.StreamLoader = new StreamLoader();
+
+            // Load the data
             var data = await SongLoader.Load();
 
-			// Register the TableView's data source
-			TableView.Source = new ViewControllerSource<Song>(TableView) {
-				DataSource = data.ToList(),
-				TextProc = s => s.Name,
-				DetailTextProc = s => s.Artist + " - " + s.Album,
-			};
-		}
-	}
+            // Register the TableView's data source
+            this.TableView.Source = new ViewControllerSource<Song>(this.TableView)
+            {
+                DataSource = data.ToList(),
+                TextProc = s => s.Name,
+                DetailTextProc = s => s.Artist + " - " + s.Album
+            };
+        }
 
+        #endregion
+    }
 }
-
